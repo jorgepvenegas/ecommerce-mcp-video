@@ -1,0 +1,33 @@
+{
+  "name": "mcp-to-db",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "mkdir -p data && drizzle-kit push",
+    "seed": "tsx seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "2.0.0-beta.2",
+    "@modelcontextprotocol/server": "2.0.0-beta.2",
+    "better-sqlite3": "^12.11.1",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "drizzle-kit": "^0.31.10",
+    "oxfmt": "^0.58.0",
+    "oxlint": "^1.73.0",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
