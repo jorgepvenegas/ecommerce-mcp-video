@@ -31,12 +31,12 @@ The server exposes one resource per table, each returning the full table as a JS
 
 | URI | Content |
 |---|---|
-| `db://tables/users` | All rows in the `users` table |
-| `db://tables/products` | All rows in the `products` table |
-| `db://tables/orders` | All rows in the `orders` table |
-| `db://tables/order_items` | All rows in the `order_items` table |
+| `urn:ecommerce:table:users` | All rows in the `users` table |
+| `urn:ecommerce:table:products` | All rows in the `products` table |
+| `urn:ecommerce:table:orders` | All rows in the `orders` table |
+| `urn:ecommerce:table:order_items` | All rows in the `order_items` table |
 
-Each resource has `mimeType: application/json`. Reading `db://tables/products` returns the products as pretty-printed JSON.
+Each resource has `mimeType: application/json`. Reading `urn:ecommerce:table:products` returns the products as pretty-printed JSON.
 
 ### query-table details
 
@@ -113,7 +113,7 @@ The tool registration in `src/tools.ts` and all three tool implementations are s
 │  (Claude, etc) │   tools+resources│  list-tables         │
 └──────────────┘                  │  describe-table      │
                                   │  query-table         │
-                                  │  db://tables/*       │
+                                  │  urn:ecommerce:table:* │
                                   └─────────┬───────────┘
                                             │
                                       ┌─────▼─────┐

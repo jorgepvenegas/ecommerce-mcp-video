@@ -7,7 +7,7 @@ type DB = BetterSQLite3Database<typeof schemaType>;
 
 export function registerResources(server: McpServer, db: DB, tables: Tables) {
   for (const [name, table] of Object.entries(tables)) {
-    const uri = `db://tables/${name}`;
+    const uri = `urn:ecommerce:table:${name}`;
     server.registerResource(
       name,
       uri,
