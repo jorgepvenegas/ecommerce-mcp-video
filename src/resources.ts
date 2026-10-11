@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/server";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type * as schemaType from "./schema";
 import type { Tables } from "./schema";
+import { fetchRows } from "./query";
 
 type DB = BetterSQLite3Database<typeof schemaType>;
 
@@ -15,10 +16,7 @@ export function registerResources(server: McpServer, db: DB, tables: Tables) {
       mimeType: "application/json",
     },
     async (uri) => {
-      const rows = db
-        .select()
-        .from(tables.products as never)
-        .all() as Record<string, unknown>[];
+      const rows = fetchRows(db, tables.products as unknown as Record<string, unknown>);
       return {
         contents: [
           {
