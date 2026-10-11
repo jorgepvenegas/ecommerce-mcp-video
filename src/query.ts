@@ -1,5 +1,6 @@
 import { eq, ne, gt, lt, gte, lte, and, asc, desc } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import type { AnySQLiteTable } from "drizzle-orm/sqlite-core";
 import type * as schemaType from "./schema";
 
 type DB = BetterSQLite3Database<typeof schemaType>;
@@ -24,7 +25,7 @@ export type FetchRowsOptions = {
   offset?: number;
 };
 
-function getColumnByName(table: Record<string, unknown>, columnName: string): unknown {
+function getColumnByName(table: AnySQLiteTable, columnName: string): unknown {
   for (const [, value] of Object.entries(table)) {
     if (
       value &&
@@ -38,7 +39,7 @@ function getColumnByName(table: Record<string, unknown>, columnName: string): un
   return null;
 }
 
-function getAllColumns(table: Record<string, unknown>): Record<string, unknown> {
+function getAllColumns(table: AnySQLiteTable): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(table)) {
     if (value && typeof value === "object" && "name" in value) {
@@ -57,7 +58,7 @@ function notFoundIn(tableName: string | undefined, columnName: string): never {
 
 export function fetchRows(
   db: DB,
-  table: Record<string, unknown>,
+  table: AnySQLiteTable,
   opts: FetchRowsOptions = {},
 ): Record<string, unknown>[] {
   const { tableName, columns: selectedColumns, where, orderBy, limit, offset } = opts;
@@ -78,9 +79,7 @@ export function fetchRows(
   }
 
   // Build query — dynamic table/column selection requires loose typing
-  let query: any = selectObj
-    ? db.select(selectObj as any).from(table as any)
-    : db.select().from(table as any);
+  let query: any = selectObj ? db.select(selectObj as any).from(table) : db.select().from(table);
 
   // Build where conditions
   if (where && where.length > 0) {

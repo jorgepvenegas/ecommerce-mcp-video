@@ -16,7 +16,7 @@ export function registerResources(server: McpServer, db: DB, tables: Tables) {
       mimeType: "application/json",
     },
     async (uri) => {
-      const rows = fetchRows(db, tables.products as unknown as Record<string, unknown>);
+      const rows = fetchRows(db, tables.products);
       return {
         contents: [
           {

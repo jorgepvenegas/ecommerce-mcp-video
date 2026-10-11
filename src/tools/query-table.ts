@@ -30,7 +30,7 @@ export async function queryTable(
 ): Promise<CallToolResult> {
   const { table: tableName, columns: selectedColumns, where, orderBy, limit, offset } = params;
 
-  const table = tables[tableName as keyof Tables] as unknown as Record<string, unknown>;
+  const table = tables[tableName as keyof Tables];
   if (!table) {
     return {
       content: [
