@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type * as schemaType from "./schema";
@@ -23,6 +24,28 @@ export function registerResources(server: McpServer, db: DB, tables: Tables) {
             uri: uri.href,
             mimeType: "application/json",
             text: JSON.stringify(rows, null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerResource(
+    "shipping-policy",
+    "https://shop.example.com/shipping-policy",
+    {
+      title: "Shipping policy",
+      description: "The store's shipping and returns policy.",
+      mimeType: "text/markdown",
+    },
+    async (uri) => {
+      const text = await readFile("./content/shipping-policy.md", "utf8");
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: "text/markdown",
+            text,
           },
         ],
       };
