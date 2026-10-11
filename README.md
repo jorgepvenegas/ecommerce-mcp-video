@@ -25,6 +25,19 @@ The server exposes three read-only tools:
 | `describe-table` | Shows columns, types, nullability, defaults, primary keys, and foreign keys for a given table |
 | `query-table` | SELECT queries with optional filters (`=`, `!=`, `>`, `<`, `>=`, `<=`), column selection, ordering, and pagination (`limit`/`offset`) |
 
+## Resources
+
+The server exposes one resource per table, each returning the full table as a JSON array:
+
+| URI | Content |
+|---|---|
+| `db://tables/users` | All rows in the `users` table |
+| `db://tables/products` | All rows in the `products` table |
+| `db://tables/orders` | All rows in the `orders` table |
+| `db://tables/order_items` | All rows in the `order_items` table |
+
+Each resource has `mimeType: application/json`. Reading `db://tables/products` returns the products as pretty-printed JSON.
+
 ### query-table details
 
 ```json
@@ -97,9 +110,10 @@ The tool registration in `src/tools.ts` and all three tool implementations are s
 ```
 ┌──────────────┐    MCP/HTTP      ┌─────────────────────┐
 │  AI Assistant │ ◄─────────────► │  MCP Server (3000)   │
-│  (Claude, etc) │    tools        │  list-tables         │
+│  (Claude, etc) │   tools+resources│  list-tables         │
 └──────────────┘                  │  describe-table      │
                                   │  query-table         │
+                                  │  db://tables/*       │
                                   └─────────┬───────────┘
                                             │
                                       ┌─────▼─────┐

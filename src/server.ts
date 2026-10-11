@@ -1,6 +1,9 @@
 import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import { toNodeHandler } from "@modelcontextprotocol/node";
 import { registerTools } from "./tools";
+import { registerResources } from "./resources";
+import { db } from "./db";
+import { tables } from "./schema";
 import { createServer } from "node:http";
 
 function factory() {
@@ -9,6 +12,7 @@ function factory() {
     version: "1.0.0",
   });
   registerTools(server);
+  registerResources(server, db, tables);
   return server;
 }
 
