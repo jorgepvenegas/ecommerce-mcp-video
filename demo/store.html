@@ -133,6 +133,7 @@
       }
 
       async function registerWebmcpTools() {
+        const names = [];
         await document.modelContext.registerTool({
           name: "search-products",
           description: "Search the store's products by name or description. Returns matching products as JSON.",
@@ -151,6 +152,7 @@
             return text(JSON.stringify(matches, null, 2));
           },
         });
+        names.push("search-products");
 
         await document.modelContext.registerTool({
           name: "get-product",
@@ -169,6 +171,7 @@
               : text(`No product with id ${id}.`);
           },
         });
+        names.push("get-product");
 
         await document.modelContext.registerTool({
           name: "add-to-cart",
@@ -188,6 +191,9 @@
             return text(`Added ${quantity} × ${p.name} to cart.`);
           },
         });
+        names.push("add-to-cart");
+
+        return names;
       }
 
       function setStatus(ok, message) {
@@ -206,8 +212,8 @@
         }
 
         try {
-          await registerWebmcpTools();
-          setStatus(true, "WebMCP ready — 3 tools registered: search-products, get-product, add-to-cart.");
+          const names = await registerWebmcpTools();
+          setStatus(true, `WebMCP ready — ${names.length} tools registered: ${names.join(", ")}.`);
         } catch (err) {
           setStatus(false, `WebMCP registration failed: ${err.message}`);
         }
