@@ -70,6 +70,22 @@ Add to your `claude_desktop_config.json`:
 
 Point your client to `http://127.0.0.1:3000/mcp`.
 
+## WebMCP demo
+
+A separate browser-based demo lives in `demo/store.html`. It uses the W3C
+[WebMCP](https://github.com/webmachinelearning/webmcp) API to expose the store
+as tools directly to a browser agent — no backend MCP server involved.
+
+| Tool | Description |
+|---|---|
+| `search-products` | Search products by name or description |
+| `get-product` | Get a single product by id |
+| `add-to-cart` | Add a product to the on-page cart |
+
+To run it: enable `about:flags#enable-webmcp-testing` in Chrome, restart, then
+open `demo/store.html` and ask the browser agent to search or add items to the
+cart.
+
 ## Scripts
 
 | Command | Description |

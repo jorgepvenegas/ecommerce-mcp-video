@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Acme Shop — WebMCP demo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --border: #d0d0d0;
+        --muted: #666;
+        --accent: #2563eb;
+      }
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 2rem;
+        max-width: 900px;
+        margin-inline: auto;
+      }
+      h1 { font-size: 1.6rem; }
+      #status {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        background: rgba(128, 128, 128, 0.08);
+      }
+      #status.ok { border-color: #16a34a; }
+      #status.missing { border-color: #dc2626; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .card h2 { font-size: 1rem; margin: 0; }
+      .card .price { font-weight: 600; }
+      .card .desc { color: var(--muted); font-size: 0.85rem; flex: 1; }
+      .card button {
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: white;
+        border-radius: 6px;
+        padding: 0.5rem;
+        cursor: pointer;
+      }
+      #cart {
+        margin-top: 2rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+      }
+      #cart:empty::before { content: "Cart is empty."; color: var(--muted); }
+      #cart div { display: flex; justify-content: space-between; padding: 0.25rem 0; }
+      code { background: rgba(128, 128, 128, 0.15); padding: 0.1rem 0.35rem; border-radius: 4px; }
+      details { margin-top: 2rem; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <h1>Acme Shop</h1>
+
+    <div id="status">Checking for WebMCP…</div>
+
+    <div class="grid" id="products"></div>
+
+    <section id="cart">
+      <h2>Cart</h2>
+      <div id="cart-items"></div>
+    </section>
+
+    <details>
+      <summary>How to run this demo</summary>
+      <p>
+        Enable WebMCP in Chrome at <code>about:flags#enable-webmcp-testing</code>,
+        restart, then open this file. Ask your browser agent to
+        <em>"search the store for headphones"</em> or <em>"add the keyboard to my cart"</em>.
+      </p>
+    </details>
+
+    <script>
+      const products = [
+        { id: 1, name: "Wireless Headphones", description: "High-quality Bluetooth headphones with noise cancellation", price: 7999, stock: 50 },
+        { id: 2, name: "USB-C Cable", description: "6ft USB-C to USB-C fast charging cable", price: 1299, stock: 200 },
+        { id: 3, name: "Mechanical Keyboard", description: "75% mechanical keyboard with hot-swap switches", price: 12999, stock: 30 },
+        { id: 4, name: "Mouse Pad", description: "Large desk pad with non-slip base", price: 1999, stock: 100 },
+        { id: 5, name: "Webcam", description: "1080p webcam with auto-focus and built-in microphone", price: 4999, stock: 75 },
+      ];
+
+      const cart = {}; // productId -> quantity
+
+      const formatPrice = (cents) => `$${(cents / 100).toFixed(2)}`;
+
+      function renderProducts() {
+        document.getElementById("products").innerHTML = products
+          .map(
+            (p) => `
+              <article class="card">
+                <h2>${p.name}</h2>
+                <div class="price">${formatPrice(p.price)}</div>
+                <div class="desc">${p.description}</div>
+                <button onclick="addToCart(${p.id})">Add to cart</button>
+              </article>`,
+          )
+          .join("");
+      }
+
+      function addToCart(id, quantity = 1) {
+        cart[id] = (cart[id] || 0) + quantity;
+        renderCart();
+      }
+
+      function renderCart() {
+        const el = document.getElementById("cart-items");
+        el.innerHTML = Object.entries(cart)
+          .map(([id, qty]) => {
+            const p = products.find((x) => x.id === Number(id));
+            return `<div><span>${qty} × ${p.name}</span><span>${formatPrice(p.price * qty)}</span></div>`;
+          })
+          .join("");
+      }
+
+      function text(content) {
+        return { content: [{ type: "text", text: content }] };
+      }
+
+      async function registerWebmcpTools() {
+        await document.modelContext.registerTool({
+          name: "search-products",
+          description: "Search the store's products by name or description. Returns matching products as JSON.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              query: { type: "string", description: "Text to match against product name or description." },
+            },
+            required: ["query"],
+          },
+          async execute({ query }) {
+            const q = String(query).toLowerCase();
+            const matches = products.filter(
+              (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q),
+            );
+            return text(JSON.stringify(matches, null, 2));
+          },
+        });
+
+        await document.modelContext.registerTool({
+          name: "get-product",
+          description: "Get a single product by id.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              id: { type: "number", description: "The product id." },
+            },
+            required: ["id"],
+          },
+          async execute({ id }) {
+            const p = products.find((x) => x.id === id);
+            return p
+              ? text(JSON.stringify(p, null, 2))
+              : text(`No product with id ${id}.`);
+          },
+        });
+
+        await document.modelContext.registerTool({
+          name: "add-to-cart",
+          description: "Add a product to the visible shopping cart and update the page.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              id: { type: "number", description: "The product id to add." },
+              quantity: { type: "number", description: "Quantity to add. Defaults to 1." },
+            },
+            required: ["id"],
+          },
+          async execute({ id, quantity = 1 }) {
+            const p = products.find((x) => x.id === id);
+            if (!p) return text(`No product with id ${id}.`);
+            addToCart(id, quantity);
+            return text(`Added ${quantity} × ${p.name} to cart.`);
+          },
+        });
+      }
+
+      function setStatus(ok, message) {
+        const el = document.getElementById("status");
+        el.className = ok ? "ok" : "missing";
+        el.textContent = message;
+      }
+
+      async function init() {
+        renderProducts();
+        renderCart();
+
+        if (!document.modelContext) {
+          setStatus(false, "WebMCP is not available in this browser. Enable chrome://flags/#enable-webmcp-testing and reload.");
+          return;
+        }
+
+        try {
+          await registerWebmcpTools();
+          setStatus(true, "WebMCP ready — 3 tools registered: search-products, get-product, add-to-cart.");
+        } catch (err) {
+          setStatus(false, `WebMCP registration failed: ${err.message}`);
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
